@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 class Router:
     # The router's identificator
     id: str
@@ -10,15 +12,24 @@ class Router:
     # The routing table is a dictionary of which
     # the key is the pair source, dest,
     # the value is the next hop and the cost of it
-    routing_table: dict[frozenset[str], tuple[str, int]]
+    routing_table: OrderedDict[frozenset[str], tuple[str, int]]
 
     def __init__(self, identificator: str):
         self.id = identificator
+        self.routing_table = OrderedDict()
         self.links = set()
-        self.routing_table = {}
+        self.links.add((frozenset([self.id, self.id]), 0))
 
     def add_link(self, link: tuple[frozenset[str], int]):
         self.links.add(link)
-    
+        for r in link[0]:
+            if (r == self.id):
+                continue
+            self.routing_table[link[0]] = (r, link[1])
+
     def __str__(self) -> str:
-        return f"Table for: {self.id}\n{self.routing_table}"
+        output: str = f"Table for: {self.id}\n"
+        for link, val in self.routing_table.items():
+            filtered_link: list[str] = [item for item in link if item != self.id]
+            output += f"Dest: {filtered_link[0]}, Next: {val[0]}, Cost: {val[1]}\n"
+        return output 

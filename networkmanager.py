@@ -14,16 +14,19 @@ def read_network_file(filename: str) -> dict[str, Router]:
         for line in network_file:
             line: str = line.strip()
             if line.startswith('r '):
+                # If the first character is an 'r', create a router
                 router_id: stri = line[2:].strip()
                 router: Router = Router(router_id)
                 routers[router_id] = router
             if line.startswith('l '):
+                # If the first character is an 'l', create a link 
                 parts: str = line.split()
                 id1: str = parts[1].strip()
                 id2: str = parts[2].strip()
                 cost: int = int(parts[3].strip())
                 router1: Router = routers.get(id1)
                 router2: Router = routers.get(id2)
+                # If both routers exist, add the link to both
                 if router1 and router2:
                     link: tuple[frozenset[str], int] = (frozenset([id1, id2]), cost)
                     router1.add_link(link)
