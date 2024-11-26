@@ -1,8 +1,9 @@
 #!/bin/python
 
 from router import Router
-from networkmanager import read_net_file 
+from networkmanager import read_network_file
 
 if __name__ == '__main__':
-    r: Router = Router("uwu")
-    print(r)
+    routers: dict[str, Router] = read_network_file("test_network.txt")
+    for id, router in routers.items():
+        print(router)
