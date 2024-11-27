@@ -19,7 +19,7 @@ def init() -> curses.window:
     # curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Yellow for highlighting
     return stdscr
 
-def handle_user_input(stdscr: curses.window, cursor_position: tuple[int, int], total_pages: int) -> tuple[int, int]:
+def handle_user_input(stdscr: curses.window, cursor_position: tuple[int, int], total_pages: int, router_count: int) -> tuple[int, int]:
     # Read key input from user
     key: int = stdscr.getch()
     # Exit if q or esc pressed
@@ -36,7 +36,7 @@ def handle_user_input(stdscr: curses.window, cursor_position: tuple[int, int], t
         return (cursor_position[0], max(cursor_position[1] - 1, 0))
     elif key == ord('s') or key == curses.KEY_DOWN:
         # Scroll down
-        return (cursor_position[0], cursor_position[1] + 1) # TODO: add minimum here
+        return (cursor_position[0], min(cursor_position[1] + 1, (router_count + 1) * router_count + router_count))
     elif key == ord('h'):
         # Show help menu
         stdscr.clear()
@@ -63,16 +63,38 @@ def draw_header(stdscr: curses.window, page: int, total_pages: int) -> None:
     # Center the page info in the header
     centered_page_info: str = page_info.center(header_width)
     # Draw the header text in yellow
-    # stdscr.attron(curses.color_pair(3))
-    stdscr.addstr(header_y + 1, (cols - len(centered_page_info)) // 2, centered_page_info)
-    # stdscr.attroff(curses.color_pair(3))
+    stdscr.addstr(header_y + 1, (cols - len(centered_page_info)) // 2, centered_page_info[:header_width - 2])
     # Draw the header border
     textpad.rectangle(stdscr, header_y, header_x, header_y + HEADER_HEIGHT - 1, header_x + header_width - 1)
 
 def draw_content(stdscr: curses.window, scroll_amount: int, routing_tables: OrderedDict[str, OrderedDict[str, tuple[str, int]]]) -> None:
+    # Setup some variables for proper display size
     rows, cols = stdscr.getmaxyx()
     content_x, content_y = 1, HEADER_HEIGHT
     content_width: int = cols - 2
     content_height: int = rows - HEADER_HEIGHT
     # Draw the content border
     textpad.rectangle(stdscr, content_y, content_x, content_y + content_height - 1, content_x + content_width - 1)
+    # Prepare routing table data
+    formatted_lines: list[str] = []
+    for router, destinations in routing_tables.items():
+        formatted_lines.append(f"Router: {router}")
+        for dest in routing_tables:
+            stdscr.addstr(10, 3, f"{len(routing_tables)}")
+            if dest == router:
+                # Router is itself, put value to 0
+                formatted_lines.append(f"Dest: {dest}, N.Hop: NONE, Cost: 0")
+            else:
+                # Get values from routing tables
+                next_hop, cost = destinations.get(dest) if dest in destinations else ("NONE", "INF")
+                formatted_lines.append(f"Dest: {dest}, N.Hop: {next_hop}, Cost: {cost}")
+        formatted_lines.append("")
+    formatted_lines.pop()
+    # Calculate max lines
+    max_lines: int = content_height - 2
+    total_lines: int = len(formatted_lines)
+    scroll_amount: int = max(0, min(scroll_amount, total_lines - max_lines))
+    visible_lines: int = formatted_lines[scroll_amount:scroll_amount + max_lines]
+    for i, line in enumerate(visible_lines):
+        stdscr.addstr(content_y + 1 + i, content_x + 1, line[:content_width - 2])
+

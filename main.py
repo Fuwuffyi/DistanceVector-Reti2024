@@ -54,21 +54,9 @@ if __name__ == '__main__':
     quit_ui: bool = False
     while not quit_ui:
         # Get user input
-        cursor_position = ui.handle_user_input(stdscr, cursor_position, total_pages)
+        cursor_position = ui.handle_user_input(stdscr, cursor_position, total_pages, len(routers))
         if cursor_position[0] == -1:
             quit_ui = True
         else:
             ui.draw(stdscr, cursor_position, total_pages, tables)
     curses.endwin()
-    """
-    for time, curr_tables in tables.items():
-        print(f"Tables at time: {time}")
-        for router_id, routing_table in curr_tables.items():
-            print(f"Table for: {router_id}")
-            for dest in routers:
-                if dest == router_id:
-                    print(f"Dest: {dest}, N.Hop: NONE, Cost: 0")
-                else:
-                    next_hop, cost = routing_table.get(dest) if dest in routing_table else ("NONE", "INF")
-                    print(f"Dest: {dest}, N.Hop: {next_hop}, Cost: {cost if cost else 'INF'}")
-    """
