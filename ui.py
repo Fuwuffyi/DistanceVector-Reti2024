@@ -1,5 +1,8 @@
 import curses
 from curses import textpad
+from typing import Final
+
+HEADER_HEIGHT: Final[int] = 3
 
 def init() -> curses.window:
     stdscr: curses.window = curses.initscr()
@@ -52,11 +55,10 @@ def draw_header(stdscr: curses.window, page: int, total_pages: int) -> None:
     rows, cols = stdscr.getmaxyx()
     header_x, header_y = 1, 0
     header_width: int = cols - 2
-    header_height: int = 3
     # Page navigation arrows and current page info
     left_arrow: str = "◀"
     right_arrow: str = "▶"
-    page_info: str = f"{left_arrow} Page {page} of {total_pages} {right_arrow}"
+    page_info: str = f"{left_arrow} Routing tables at T={page} of {total_pages} {right_arrow}"
     # Center the page info in the header
     centered_page_info: str = page_info.center(header_width)
     # Draw the header text in yellow
@@ -64,7 +66,12 @@ def draw_header(stdscr: curses.window, page: int, total_pages: int) -> None:
     stdscr.addstr(header_y + 1, (cols - len(centered_page_info)) // 2, centered_page_info)
     # stdscr.attroff(curses.color_pair(3))
     # Draw the header border
-    textpad.rectangle(stdscr, header_y, header_x, header_y + header_height - 1, header_x + header_width - 1)
+    textpad.rectangle(stdscr, header_y, header_x, header_y + HEADER_HEIGHT - 1, header_x + header_width - 1)
 
 def draw_content(stdscr: curses.window, cursor_position: tuple[int, int]) -> None:
-    pass
+    rows, cols = stdscr.getmaxyx()
+    content_x, content_y = 1, HEADER_HEIGHT
+    content_width: int = cols - 2
+    content_height: int = rows - HEADER_HEIGHT
+    # Draw the content border
+    textpad.rectangle(stdscr, content_y, content_x, content_y + content_height - 1, content_x + content_width - 1)
