@@ -52,5 +52,12 @@ if __name__ == '__main__':
             # Refresh the screen
             stdscr.refresh()
 
+    # TODO: uncomment once UI is done
     # Start the UI
-    curses.wrapper(main)
+    # curses.wrapper(main)
+    for t, time_tables in tables.items():
+        print(f"Tables at time: t = {t}")
+        for id, table in time_tables.items():
+            print(f"Table for: {list(id)[0]}")
+            for dest, val in table.items():
+                print(f"Dest: {dest}, N.Hop: {val[0]}, Cost: {val[1]}")

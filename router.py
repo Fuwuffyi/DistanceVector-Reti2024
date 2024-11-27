@@ -31,10 +31,3 @@ class Router:
 
     def get_frozen_table(self) -> OrderedDict[frozenset[str], tuple[str, int]]:
         return copy.deepcopy(self.routing_table)
-
-    def __str__(self) -> str:
-        output: str = f"Table for: {self.id}\n"
-        for link, val in self.routing_table.items():
-            filtered_link: list[str] = [item for item in link if item != self.id]
-            output += f"Dest: {filtered_link[0]}, Next: {val[0]}, Cost: {val[1]}\n"
-        return output 
