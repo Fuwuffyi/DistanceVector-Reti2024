@@ -58,14 +58,11 @@ if __name__ == '__main__':
     for t, time_tables in tables.items():
         print(f"Tables at time: t = {t}")
         for s_id, table in time_tables.items():
-            id: str = list(s_id)[0]
+            id = list(s_id)[0]
             print(f"Table for: {id}")
-            for s_router_id in [frozenset([r, id]) for r in routers]:
-                router_id: list[str] | str = [item for item in s_router_id if item != id]
-                router_id = router_id[0] if len(router_id) > 0 else id
-                if router_id == id:
-                    print(f"Dest: {router_id}, N.Hop: {router_id}, Cost: 0")
+            for dest in routers:
+                if dest == id:
+                    print(f"  Dest: {dest}, N.Hop: {id}, Cost: 0")
                 else:
-                    print(f"Dest: {router_id}, N.Hop: {table[s_router_id][0] if s_router_id in table else "NONE"}, Cost: {table[s_router_id][1] if s_router_id in table else "INF"}")
-                
-
+                    next_hop, cost = table.get(frozenset([id, dest]), ("NONE", float('inf')))
+                    print(f"  Dest: {dest}, N.Hop: {next_hop}, Cost: {cost if cost != float('inf') else 'INF'}")
