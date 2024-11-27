@@ -47,26 +47,18 @@ if __name__ == '__main__':
     # Initialize the UI
     stdscr = ui.init()
     # Create the window to make sure it is the right dimensions
-    orig_rows, orig_cols = stdscr.getmaxyx()
-    window: curses.window = curses.newwin(orig_rows - 2, orig_cols - 2, 1, 1)
     cursor_position: tuple[int, int] = (0, 0)
     total_pages: int = len(tables) - 1
     # Draw the UI
+    ui.draw(stdscr, cursor_position, total_pages)
     quit_ui: bool = False
     while not quit_ui:
-        # Resize window
-        rows, cols = stdscr.getmaxyx()
-        if orig_cols != cols or orig_rows != rows:
-            orig_rows, orig_cols = rows, cols
-            window.resize(orig_rows - 2, orig_cols - 2)
         # Get user input
         cursor_position = ui.handle_user_input(stdscr, cursor_position, total_pages)
         if cursor_position[0] == -1:
             quit_ui = True
-        # Clear the screen
-        stdscr.clear()
-        # Refresh the screen
-        stdscr.refresh()
+        else:
+            ui.draw(stdscr, cursor_position, total_pages)
     curses.endwin()
     """
     for time, curr_tables in tables.items():
