@@ -32,3 +32,9 @@ class Router:
 
     def get_frozen_table(self) -> OrderedDict[frozenset[str], tuple[str, int]]:
         return copy.deepcopy(self.routing_table)
+
+    def get_neighbors(self) -> set[str]:
+        return {neighbor for link in self.links for neighbor in link[0] if neighbor != self.id}
+
+    def update_table(self, other_routing_table: OrderedDict[frozenset[str], tuple[str, int]]) -> None:
+        pass

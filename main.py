@@ -10,7 +10,13 @@ def run_distance_vector(routers: dict[str, Router], t_max: int):
     for t in range(0, len(routers)):
         # Create the new container for the tables at t
         tables[t] = OrderedDict()
-        # TODO: implement algorithm
+        # Run the algorithm
+        for id, router in routers.items():
+            # Check all the other connected routers
+            neighbors: set[str] = router.get_neighbors()
+            # Send the current routing table to all other neighbors
+            for other_id in neighbors:
+                routers[other_id].update_table(router.get_frozen_table())
         # Save all the router's tables
         for id, router in routers.items():
             tables[t][frozenset([id])] = router.get_frozen_table()
