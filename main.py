@@ -50,7 +50,7 @@ if __name__ == '__main__':
     orig_rows, orig_cols = stdscr.getmaxyx()
     window: curses.window = curses.newwin(orig_rows - 2, orig_cols - 2, 1, 1)
     cursor_position: tuple[int, int] = (0, 0)
-    total_pages: int = len(tables) - 1 # TODO: fix page count
+    total_pages: int = len(tables) - 1
     # Draw the UI
     quit_ui: bool = False
     while not quit_ui:
