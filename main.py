@@ -20,9 +20,6 @@ def run_distance_vector(routers: dict[str, Router], t_max: int) -> dict[int, Ord
         tables[t] = OrderedDict()
         # Run the algorithm
         for id, router in routers.items():
-            # Skip tables that have not been updated
-            if not router.dirty_table:
-                continue
             # Check all the other connected routers
             neighbors: set[str] = router.get_neighbors()
             # Send the current routing table to all other neighbors
@@ -35,7 +32,6 @@ def run_distance_vector(routers: dict[str, Router], t_max: int) -> dict[int, Ord
             # Check early exit if all routing tables have converged
             if router.dirty_table:
                 done = False
-            router.dirty_table = False
         t += 1
     return tables
 

@@ -42,6 +42,7 @@ class Router:
         return {neighbor for link in self.links for neighbor in link if neighbor != self.id}
 
     def update_table(self, sender_id: str, sender_table: OrderedDict[str, tuple[str, int]]) -> None:
+        self.dirty_table = False
         current_link_weight: int = self.links[frozenset([sender_id, self.id])]
         for dest, connection in sender_table.items():
             if dest not in self.routing_table or self.routing_table[dest][1] > connection[1] + current_link_weight:
