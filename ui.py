@@ -28,10 +28,10 @@ def handle_user_input(stdscr: curses.window, cursor_position: tuple[int, int], t
         return (-1, -1)
     elif key == ord('d') or key == curses.KEY_RIGHT:
         # Next page
-        return ((cursor_position[0] + 1) % (total_pages + 1), 0)
+        return ((cursor_position[0] + 1) % (total_pages + 1), cursor_position[1])
     elif key == ord('a') or key == curses.KEY_LEFT:
         # Previous page
-        return ((cursor_position[0] - 1) % (total_pages + 1), 0)
+        return ((cursor_position[0] - 1) % (total_pages + 1), cursor_position[1])
     elif key == ord('w') or key == curses.KEY_UP:
         # Scroll up
         return (cursor_position[0], max(cursor_position[1] - 1, 0))
