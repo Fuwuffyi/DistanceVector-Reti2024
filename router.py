@@ -1,3 +1,4 @@
+import copy
 from collections import OrderedDict
 
 class Router:
@@ -14,19 +15,22 @@ class Router:
     # the value is the next hop and the cost of it
     routing_table: OrderedDict[frozenset[str], tuple[str, int]]
 
-    def __init__(self, identificator: str):
+    def __init__(self, identificator: str) -> None:
         self.id = identificator
         self.routing_table = OrderedDict()
         self.links = set()
         # Adds itself to the table at cost 0
         self.links.add((frozenset([self.id, self.id]), 0))
 
-    def add_link(self, link: tuple[frozenset[str], int]):
+    def add_link(self, link: tuple[frozenset[str], int]) -> None:
         self.links.add(link)
         for r in link[0]:
             if (r == self.id):
                 continue
             self.routing_table[link[0]] = (r, link[1])
+
+    def get_frozen_table(self) -> OrderedDict[frozenset[str], tuple[str, int]]:
+        return copy.deepcopy(self.routing_table)
 
     def __str__(self) -> str:
         output: str = f"Table for: {self.id}\n"
