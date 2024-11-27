@@ -12,20 +12,31 @@ def run_distance_vector(routers: dict[str, Router], t_max: int):
     tables[0] = OrderedDict()
     for id, router in routers.items():
         tables[0][id] = router.get_frozen_table()
-    # Start routing table exchange
-    for t in range(1, len(routers)):
+    # Loop conditions
+    done: bool = False
+    t: int = 1
+    while not done and t < t_max:
         # Create the new container for the tables at t
         tables[t] = OrderedDict()
         # Run the algorithm
         for id, router in routers.items():
+            # Skip tables that have not been updated
+            if not router.dirty_table:
+                continue
             # Check all the other connected routers
             neighbors: set[str] = router.get_neighbors()
             # Send the current routing table to all other neighbors
             for other_id in neighbors:
                 routers[other_id].update_table(sender_id=id, sender_table=router.get_frozen_table())
-        # Save all the router's tables
+        done = True
         for id, router in routers.items():
+            # Save all the router's tables
             tables[t][id] = router.get_frozen_table()
+            # Check early exit if all routing tables have converged
+            if router.dirty_table:
+                done = False
+            router.dirty_table = False
+        t += 1
     return tables
 
 if __name__ == '__main__':
@@ -39,7 +50,7 @@ if __name__ == '__main__':
     orig_rows, orig_cols = stdscr.getmaxyx()
     window: curses.window = curses.newwin(orig_rows - 2, orig_cols - 2, 1, 1)
     cursor_position: tuple[int, int] = (0, 0)
-    total_pages: int = len(routers) - 1
+    total_pages: int = len(tables) - 1 # TODO: fix page count
     # Draw the UI
     quit_ui: bool = False
     while not quit_ui:

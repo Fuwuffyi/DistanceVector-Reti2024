@@ -15,10 +15,15 @@ class Router:
     # the value is the next hop and the cost of it
     routing_table: OrderedDict[str, tuple[str, int]]
 
+    # Flag to check if the table is dirty
+    # The router will send the table only if it is dirty
+    dirty_table: bool
+
     def __init__(self, identificator: str) -> None:
         self.id = identificator
         self.routing_table = OrderedDict()
         self.links = dict()
+        self.dirty_table = True
         # Adds itself to the table at cost 0
         self.routing_table[self.id] = (self.id, 0)
         self.links[frozenset([self.id, self.id])] = 0
@@ -41,3 +46,5 @@ class Router:
         for dest, connection in sender_table.items():
             if dest not in self.routing_table or self.routing_table[dest][1] > connection[1] + current_link_weight:
                 self.routing_table[dest] = (sender_id, connection[1] + current_link_weight)
+                self.dirty_table = True
+
