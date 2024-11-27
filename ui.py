@@ -89,13 +89,17 @@ def draw_content(stdscr: curses.window, scroll_amount: int, routing_tables: Orde
                 # Get values from routing tables
                 next_hop, cost = destinations.get(dest) if dest in destinations else ("NONE", "INF")
                 formatted_lines.append(f"Dest: {dest}, N.Hop: {next_hop}, Cost: {cost}")
-        formatted_lines.append("")
+        formatted_lines.append(None)
     formatted_lines.pop()
     # Calculate max lines
     max_lines: int = content_height - 2
     total_lines: int = len(formatted_lines)
     scroll_amount: int = max(0, min(scroll_amount, total_lines - max_lines))
     visible_lines: int = formatted_lines[scroll_amount:scroll_amount + max_lines]
-    for i, line in enumerate(visible_lines):
-        stdscr.addstr(content_y + 1 + i, content_x + 1, line[:content_width - 2])
-
+    line_y: int = content_y + 1
+    for line in visible_lines:
+        if line:
+            stdscr.addstr(line_y, content_x + 1, line[:content_width - 2])
+        else:
+            stdscr.hline(line_y, content_x + 1, curses.ACS_HLINE, content_width - 2)
+        line_y += 1
