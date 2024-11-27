@@ -26,20 +26,20 @@ def main(stdscr: curses.window) -> any:
             break
         elif key == curses.KEY_RIGHT or key == ord('d'):
             # Move RIGHT
-            cursor_position = (cursor_position[0] + 1, cursor_position[0])
+            cursor_position = (cursor_position[0] + 1 if cursor_position[0] + 1 < len(routers) else len(routers) - 1, cursor_position[1])
         elif key == curses.KEY_LEFT or key == ord('a'):
             # Move LEFT 
-            cursor_position = (cursor_position[0] - 1, cursor_position[0])
+            cursor_position = (cursor_position[0] - 1 if cursor_position[0] - 1 >= 0 else 0, cursor_position[1])
         elif key == curses.KEY_UP or key == ord('w'):
             # Move UP 
-            cursor_position = (cursor_position[0], cursor_position[0] - 1)
+            cursor_position = (cursor_position[0], cursor_position[1] - 1 if cursor_position[1] - 1 >= 0 else 0)
         elif key == curses.KEY_DOWN or key == ord('s'):
             # Move DOWN 
-            cursor_position = (cursor_position[0], cursor_position[0] + 1)
+            cursor_position = (cursor_position[0], cursor_position[1] + 1) # TODO: add other bound
         # Clear the screen
         stdscr.clear()
-        # TODO: remove once UI is finished
-        stdscr.addstr(0, 0, f"Current pos: {cursor_position}")
+        # Draw the UI
+        stdscr.addstr(0, 0, f"Current page: t = {cursor_position[0]}")
         # Refresh the screen
         stdscr.refresh()
 
