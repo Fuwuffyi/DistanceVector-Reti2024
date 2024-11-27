@@ -3,10 +3,13 @@ r B
 r C
 r D
 r E
+r F
 l A B 1
-l A C 6
-l B C 2
-l B D 1
-l C D 3
-l C E 7
-l D E 2
+l A F 3
+l B C 3
+l B E 5
+l B F 1
+l C D 2
+l D E 1
+l D F 6
+l E F 2
