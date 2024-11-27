@@ -18,6 +18,7 @@ class Router:
         self.id = identificator
         self.routing_table = OrderedDict()
         self.links = set()
+        # Adds itself to the table at cost 0
         self.links.add((frozenset([self.id, self.id]), 0))
 
     def add_link(self, link: tuple[frozenset[str], int]):

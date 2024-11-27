@@ -23,6 +23,7 @@ def read_network_file(filename: str) -> dict[str, Router]:
                 parts: str = line.split()
                 id1: str = parts[1].strip()
                 id2: str = parts[2].strip()
+                # Get the various components of the link
                 cost: int = int(parts[3].strip())
                 router1: Router = routers.get(id1)
                 router2: Router = routers.get(id2)
