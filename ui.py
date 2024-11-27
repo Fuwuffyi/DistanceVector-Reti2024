@@ -21,6 +21,7 @@ def init() -> curses.window:
 
 def handle_user_input(stdscr: curses.window, cursor_position: tuple[int, int], total_pages: int, router_count: int) -> tuple[int, int]:
     # Read key input from user
+    rows, cols = stdscr.getmaxyx()
     key: int = stdscr.getch()
     # Exit if q or esc pressed
     if key == ord('q') or key == 27:
@@ -36,7 +37,7 @@ def handle_user_input(stdscr: curses.window, cursor_position: tuple[int, int], t
         return (cursor_position[0], max(cursor_position[1] - 1, 0))
     elif key == ord('s') or key == curses.KEY_DOWN:
         # Scroll down
-        return (cursor_position[0], min(cursor_position[1] + 1, (router_count + 1) * router_count + router_count))
+        return (cursor_position[0], min(cursor_position[1] + 1, (router_count + 1) * router_count + router_count - (rows - HEADER_HEIGHT - 1)))
     elif key == ord('h'):
         # Show help menu
         stdscr.clear()
