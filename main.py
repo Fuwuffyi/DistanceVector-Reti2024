@@ -5,12 +5,8 @@ from router import Router
 from collections import OrderedDict
 from networkmanager import read_network_file
 
-if __name__ == '__main__':
-    # Read the current network configuration
-    routers: dict[str, Router] = read_network_file("test_network.txt")
-    # Dictionary to save all the steps through the algorithm
+def run_distance_vector(routers: dict[str, Router], t_max: int):
     tables: dict[int, OrderedDict[frozenset[str], tuple[str, int]]] = dict()
-    # Simulate the algorithm (just run through it with tMax = len(routers) for convergence)
     for t in range(0, len(routers)):
         # Create the new container for the tables at t
         tables[t] = OrderedDict()
@@ -18,6 +14,13 @@ if __name__ == '__main__':
         # Save all the router's tables
         for id, router in routers.items():
             tables[t][frozenset([id])] = router.get_frozen_table()
+    return tables
+
+if __name__ == '__main__':
+    # Read the current network configuration
+    routers: dict[str, Router] = read_network_file("test_network.txt")
+    # Run the algorithm and save all the steps
+    tables: dict[int, OrderedDict[frozenset[str], tuple[str, int]]] = run_distance_vector(routers=routers, t_max=len(routers))
 
     # Function used to draw the UI
     def main(stdscr: curses.window) -> any:
