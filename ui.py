@@ -13,18 +13,21 @@ def init() -> curses.window:
     stdscr.keypad(True)
     # stdscr.nodelay()
     # stdscr.timeout(100)
-    # curses.start_color()  # Initialize color support
-    # curses.init_pair(1, curses.COLOR_BLUE, curses.COLOR_BLACK)  # Blue on black for header
-    # curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)  # White on black for text
-    # curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Yellow for highlighting
+    curses.start_color()
+    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)       # Header borders
+    curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_WHITE)      # Header text
+    curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)       # Router table borders
+    curses.init_pair(4, curses.COLOR_BLUE, curses.COLOR_BLACK)    # Router table separators
+    curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK)    # Router table text
+    curses.init_pair(6, curses.COLOR_YELLOW, curses.COLOR_RED)    # Help text
     return stdscr
 
 def handle_user_input(stdscr: curses.window, cursor_position: tuple[int, int], total_pages: int, router_count: int) -> tuple[int, int]:
     # Read key input from user
     rows, cols = stdscr.getmaxyx()
     key: int = stdscr.getch()
-    # Exit if q or esc pressed
-    if key == ord('q') or key == 27:
+    # Exit if q pressed
+    if key == ord('q'):
         return (-1, -1)
     elif key == ord('d') or key == curses.KEY_RIGHT:
         # Next page
@@ -41,7 +44,7 @@ def handle_user_input(stdscr: curses.window, cursor_position: tuple[int, int], t
     elif key == ord('h'):
         # Show help menu
         stdscr.clear()
-        stdscr.addstr(1, 1, "Help: Use 'a/arrow left' for previous page, 'd/arrow right' for next page, 'q/esc' to quit.")
+        stdscr.addstr(1, 1, "Help: Use 'a/arrow left' for previous page, 'd/arrow right' for next page, 'q' to quit.", curses.color_pair(6))
         stdscr.refresh()
         stdscr.getch()
     return cursor_position
@@ -60,13 +63,15 @@ def draw_header(stdscr: curses.window, page: int, total_pages: int) -> None:
     # Page navigation arrows and current page info
     left_arrow: str = "◀"
     right_arrow: str = "▶"
-    page_info: str = f"{left_arrow} Routing tables at T={page} of {total_pages} {right_arrow}"
+    page_info: str = f"{left_arrow} Routing tables at T={page} / {total_pages} {right_arrow}"
     # Center the page info in the header
     centered_page_info: str = page_info.center(header_width)
     # Draw the header text in yellow
-    stdscr.addstr(header_y + 1, (cols - len(centered_page_info)) // 2, centered_page_info[:header_width - 2])
+    stdscr.addstr(header_y + 1, (cols - len(centered_page_info)) // 2, centered_page_info[:header_width - 2], curses.color_pair(2))
     # Draw the header border
+    stdscr.attron(curses.color_pair(1))
     textpad.rectangle(stdscr, header_y, header_x, header_y + HEADER_HEIGHT - 1, header_x + header_width - 1)
+    stdscr.attroff(curses.color_pair(1))
 
 def draw_content(stdscr: curses.window, scroll_amount: int, routing_tables: OrderedDict[str, OrderedDict[str, tuple[str, int]]]) -> None:
     # Setup some variables for proper display size
@@ -75,7 +80,9 @@ def draw_content(stdscr: curses.window, scroll_amount: int, routing_tables: Orde
     content_width: int = cols - 2
     content_height: int = rows - HEADER_HEIGHT
     # Draw the content border
+    stdscr.attron(curses.color_pair(3))
     textpad.rectangle(stdscr, content_y, content_x, content_y + content_height - 1, content_x + content_width - 1)
+    stdscr.attron(curses.color_pair(3))
     # Prepare routing table data
     formatted_lines: list[str] = []
     for router, destinations in routing_tables.items():
@@ -99,7 +106,9 @@ def draw_content(stdscr: curses.window, scroll_amount: int, routing_tables: Orde
     line_y: int = content_y + 1
     for line in visible_lines:
         if line:
-            stdscr.addstr(line_y, content_x + 1, line[:content_width - 2])
+            stdscr.addstr(line_y, content_x + 1, line[:content_width - 2], curses.color_pair(5))
         else:
+            stdscr.attron(curses.color_pair(4))
             stdscr.hline(line_y, content_x + 1, curses.ACS_HLINE, content_width - 2)
+            stdscr.attron(curses.color_pair(4))
         line_y += 1
