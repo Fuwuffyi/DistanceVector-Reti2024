@@ -36,5 +36,5 @@ class Router:
     def get_neighbors(self) -> set[str]:
         return {neighbor for link in self.links for neighbor in link[0] if neighbor != self.id}
 
-    def update_table(self, other_routing_table: OrderedDict[frozenset[str], tuple[str, int]]) -> None:
+    def update_table(self, sender_id: str, sender_table: OrderedDict[frozenset[str], tuple[str, int]]) -> None:
         pass

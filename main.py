@@ -16,7 +16,7 @@ def run_distance_vector(routers: dict[str, Router], t_max: int):
             neighbors: set[str] = router.get_neighbors()
             # Send the current routing table to all other neighbors
             for other_id in neighbors:
-                routers[other_id].update_table(router.get_frozen_table())
+                routers[other_id].update_table(sender_id=id, sender_table=router.get_frozen_table())
         # Save all the router's tables
         for id, router in routers.items():
             tables[t][frozenset([id])] = router.get_frozen_table()
