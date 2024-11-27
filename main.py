@@ -6,7 +6,7 @@ from router import Router
 from collections import OrderedDict
 from networkmanager import read_network_file
 
-def run_distance_vector(routers: dict[str, Router], t_max: int):
+def run_distance_vector(routers: dict[str, Router], t_max: int) -> dict[int, OrderedDict[str, OrderedDict[str, tuple[str, int]]]]:
     tables: dict[int, OrderedDict[str, OrderedDict[str, tuple[str, int]]]] = dict()
     # Initialize T=0
     tables[0] = OrderedDict()
@@ -43,14 +43,14 @@ if __name__ == '__main__':
     # Read the current network configuration
     routers: dict[str, Router] = read_network_file("test_network.txt")
     # Run the algorithm and save all the steps
-    tables: dict[int, OrderedDict[frozenset[str], tuple[str, int]]] = run_distance_vector(routers=routers, t_max=len(routers))
+    tables: dict[int, OrderedDict[str, OrderedDict[str, tuple[str, int]]]] = run_distance_vector(routers=routers, t_max=len(routers))
     # Initialize the UI
     stdscr = ui.init()
     # Create the window to make sure it is the right dimensions
     cursor_position: tuple[int, int] = (0, 0)
     total_pages: int = len(tables) - 1
     # Draw the UI
-    ui.draw(stdscr, cursor_position, total_pages)
+    ui.draw(stdscr, cursor_position, total_pages, tables)
     quit_ui: bool = False
     while not quit_ui:
         # Get user input
@@ -58,7 +58,7 @@ if __name__ == '__main__':
         if cursor_position[0] == -1:
             quit_ui = True
         else:
-            ui.draw(stdscr, cursor_position, total_pages)
+            ui.draw(stdscr, cursor_position, total_pages, tables)
     curses.endwin()
     """
     for time, curr_tables in tables.items():

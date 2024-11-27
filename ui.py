@@ -1,5 +1,6 @@
 import curses
 from curses import textpad
+from collections import OrderedDict
 from typing import Final
 
 HEADER_HEIGHT: Final[int] = 3
@@ -44,10 +45,10 @@ def handle_user_input(stdscr: curses.window, cursor_position: tuple[int, int], t
         stdscr.getch()
     return cursor_position
 
-def draw(stdscr: curses.window, cursor_position: tuple[int, int], total_pages: int) -> None:
+def draw(stdscr: curses.window, cursor_position: tuple[int, int], total_pages: int, routing_tables: dict[int, OrderedDict[str, OrderedDict[str, tuple[str, int]]]]) -> None:
     stdscr.clear()
     draw_header(stdscr, cursor_position[0], total_pages)
-    draw_content(stdscr, cursor_position)
+    draw_content(stdscr, cursor_position, routing_tables[cursor_position[0]])
     stdscr.refresh()
 
 def draw_header(stdscr: curses.window, page: int, total_pages: int) -> None:
@@ -68,7 +69,7 @@ def draw_header(stdscr: curses.window, page: int, total_pages: int) -> None:
     # Draw the header border
     textpad.rectangle(stdscr, header_y, header_x, header_y + HEADER_HEIGHT - 1, header_x + header_width - 1)
 
-def draw_content(stdscr: curses.window, cursor_position: tuple[int, int]) -> None:
+def draw_content(stdscr: curses.window, cursor_position: tuple[int, int], routing_tables: OrderedDict[str, OrderedDict[str, tuple[str, int]]]) -> None:
     rows, cols = stdscr.getmaxyx()
     content_x, content_y = 1, HEADER_HEIGHT
     content_width: int = cols - 2
