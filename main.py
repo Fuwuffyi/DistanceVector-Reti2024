@@ -13,25 +13,39 @@ def run_distance_vector(routers: dict[str, Router], t_max: int) -> dict[int, Ord
     tables[0] = OrderedDict()
     for id, router in routers.items():
         tables[0][id] = router.get_frozen_table()
+    # Set exit variables
+    done: bool = False
     t: int = 1
-    while t < t_max:
+    # Run the algorithm
+    while not done and t < t_max:
         # Create the new container for the tables at t
         tables[t] = OrderedDict()
         # Send all messages (routing tables) to the network
         network: dict[tuple[str, str], OrderedDict[str, OrderedDict[str, tuple[str, int]]]] = dict()
         for id, router in routers.items():
+            # Skip routers that have not been updated last t
+            if not router.dirty_table:
+                continue
             # Check all the other connected routers
             neighbors: set[str] = router.get_neighbors()
             # Send the current routing table to all other neighbors
             for other_id in neighbors:
                 network[(id, other_id)] = router.get_frozen_table()
+            # Set the router's dirty flag to false
+            router.dirty_table = False
         # Recieve all routing tables from the network
         for (sender_id, receiver_id), table in network.items():
             routers[receiver_id].update_table(sender_id=sender_id, sender_table=table)
         # Save current routing tables to dict
+        done = True
         for id, router in routers.items():
             tables[t][id] = router.get_frozen_table()
+            if router.dirty_table:
+                done = False
         t += 1
+    # If early exit the last table will be same as previous
+    if done == True:
+        del tables[t - 1]
     return tables
 
 if __name__ == '__main__':
