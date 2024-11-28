@@ -1,0 +1,171 @@
+\documentclass[12pt]{article}
+% Packages for styling
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+% Page layout
+\geometry{a4paper, margin=1in}
+% Header and footer styling
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\textit{Distance vector routing} \hspace{5pt} \textbullet \hspace{5pt} \textit{Palazzini Luca}}
+\fancyfoot[C]{\thepage}
+% Code snippet stylings
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=true,                  
+    tabsize=4
+}
+\lstset{style=mystyle}
+% Title definition
+\title{Programmazione di Reti \\ Distance vector routing}
+\author{Palazzini Luca}
+% Start of the document
+\begin{document}
+\maketitle
+\section{Funzionamento del protocollo}
+Lo script python simula il protocollo Distance Vector Routing, overo un tipo di protocollo di routing basato sull'algoritmo di Bellman-Ford.
+%
+I nodi all'inizio dell'esecuzione conoscono solo i propri vicini, ovvero i nodi connessi a loro stessi.
+%
+Tramite l'ulitizzo dell'algoritmo tutti i nodi dovranno sapere il prossimo passo per arrivare a qualsiasi altro nodo nel miglior modo possibile.
+\subsection{Specifiche dello script}
+Lo script inizialmente legge da un file la configurazione di rete per creare dei router, contenenti solo i collegamenti ad i vicini e la propria routing table, questo per avvicinarsi a come un nodo potrebbe funzionare nel mondo reale.
+\begin{lstlisting}[language=Python, caption=Classe del router]
+class Router:
+    id: str
+    # The links between this router and another
+    links: dict[frozenset[str], int]
+    # A routing table that contains for each destination
+    # the next hop and the cost to reach that node
+    routing_table: OrderedDict[str, tuple[str, int]]
+    dirty_table: bool
+
+    def __init__(self, identificator: str) -> None:
+        self.id = identificator
+        self.routing_table = OrderedDict()
+        self.links = dict()
+        self.dirty_table = True
+        # Adds itself to the table at cost 0
+        self.routing_table[self.id] = (self.id, 0)
+        self.links[frozenset([self.id, self.id])] = 0
+
+    def add_link(self, link: tuple[frozenset[str], int]) -> None:
+        self.links[link[0]] = link[1]
+        for r in link[0]:
+            if (r == self.id):
+                continue
+            self.routing_table[r] = (r, link[1])
+\end{lstlisting}
+Inizializzata la rete, il programma inizierá a scambiare le routing table di tutti i nodi con tutti i vicini, salvando ad ogni step le nuove routing table per poter vedere come la rete si evolve nel tempo.
+Come si puó vedere dal codice, l'algoritmo che si svolge ha tre fasi:
+\begin{itemize}
+\item Tutte le tabelle di routing finiscono in "rete"
+\item Tutti i router ottengono le tabelle di routing mandate dai vicini dalla "rete"
+\item Vengono salvate tutte le tabelle di routing del tempo attuale t
+\end{itemize}
+\begin{lstlisting}[language=Python, caption=Simulazione della rete]
+def run_distance_vector(routers: dict[str, Router], t_max: int) -> dict[int, OrderedDict[str, OrderedDict[str, tuple[str, int]]]]:
+    tables: dict[int, OrderedDict[str, OrderedDict[str, tuple[str, int]]]] = dict()
+    # Initialize T=0
+    tables[0] = OrderedDict()
+    for id, router in routers.items():
+        tables[0][id] = router.get_frozen_table()
+    # Set exit variables
+    done: bool = False
+    t: int = 1
+    # Run the algorithm
+    while not done and t < t_max:
+        # Create the new container for the tables at t
+        tables[t] = OrderedDict()
+        # Send all messages (routing tables) to the network
+        network: dict[tuple[str, str], OrderedDict[str, OrderedDict[str, tuple[str, int]]]] = dict()
+        for id, router in routers.items():
+            # Skip routers that have not been updated last t
+            if not router.dirty_table:
+                continue
+            # Check all the other connected routers
+            neighbors: set[str] = router.get_neighbors()
+            # Send the current routing table to all other neighbors
+            for other_id in neighbors:
+                network[(id, other_id)] = router.get_frozen_table()
+            # Set the router's dirty flag to false
+            router.dirty_table = False
+        # Recieve all routing tables from the network
+        for (sender_id, receiver_id), table in network.items():
+            routers[receiver_id].update_table(sender_id=sender_id, sender_table=table)
+        # Save current routing tables to dict
+        done = True
+        for id, router in routers.items():
+            tables[t][id] = router.get_frozen_table()
+            if router.dirty_table:
+                done = False
+        t += 1
+    # If early exit the last table will be same as previous
+    if done == True:
+        del tables[t - 1]
+    return tables
+\end{lstlisting}
+Una volta un router ottiene le routing table dei suoi vicini, potrá aggiornare la propria controllando il proprio costo per il nodo e quello del vicino (piú il costo del link su cui é il nodo), nel caso sia minore esso puó rimpiazzare il valore della tabella di routing per quel nodo.
+\begin{lstlisting}[language=Python, caption=Funzione di aggiornamento delle tabelle]
+    def update_table(self, sender_id: str, sender_table: OrderedDict[str, tuple[str, int]]) -> None:
+        current_link_weight: int = self.links[frozenset([sender_id, self.id])]
+        for dest, connection in sender_table.items():
+            if dest not in self.routing_table or self.routing_table[dest][1] > connection[1] + current_link_weight:
+                self.routing_table[dest] = (sender_id, connection[1] + current_link_weight)
+                self.dirty_table = True
+\end{lstlisting}
+\section{Utilizzo del codice}
+Il codice non richiede alcuna libreria o applicazione aggiuntiva oltre a quelle già presenti nella repository, eccetto se lo si prova ad eseguire in ambiente windows (bisognerá scaricare il modulo window-curses).
+\\
+Nonostante ciò queste sono le librerie utilizzate (native di python3) nel progetto:
+\begin{itemize}
+  \item Python 3.x
+  \item Curses (per la \texttt{TUI} (terminal UI))
+\end{itemize}
+Per modificare la configurazione della rete si puó creare un file di testo contenente i router e le connessioni fra essi come sotto riportato:
+\begin{itemize}
+    \item Nella prima sezione del file, scrivere tutti i nodi che compongono la rete, come: \\ \texttt{r Router1} \\ \texttt{r Router2} \\ etc...
+    \item Nella seconda sezione del file, scrivere tutte le connessioni fra i nodi, con il costo delle collezioni, come: \\ \texttt{l Router1 Router2 5} \\ \texttt{l Router2 Router3 7} \\ etc...
+\end{itemize}
+Per eseguire il codice correttamente basterá eseguire i seguenti passaggi:
+\begin{enumerate}
+\item Eseguire lo script con il comando seguente
+\begin{lstlisting}[language=Bash, caption=Esecuzione dello script]
+./main.py <configurazione_rete.txt>
+# OR
+python main.py <configurazione_rete.txt>
+\end{lstlisting}
+\item Se il programma ritorna con un errore di una libreria non trovata, l'output sará trovato in "output.json", altrimenti si puó utilizzare l'interfaccia \texttt{TUI}
+\item Utilizzare il tasto \texttt{h} per controllare i comandi sotto riportati
+\begin{itemize}
+\item \texttt{A}/\texttt{D} o \texttt{Freccia Destra}/\texttt{Sinistra} per cambiare la pagina, ovvero il valore del tempo
+\item \texttt{W}/\texttt{S} o \texttt{Freccia Su}/\texttt{Giú} per muovere la lista delle tabelle di routing su o giú
+\item \texttt{Q}/\texttt{ESC} per uscire dall'applicazione
+\end{itemize}
+\end{enumerate}
+\section{Considerazioni aggiuntive}
+\begin{itemize}
+\item Il programma non é necessariamente uguale a ció che succede con nodi reali, chiaramente questo script in python é una simulazione non realistica.
+\end{itemize}
+\end{document}
+
