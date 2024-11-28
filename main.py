@@ -48,14 +48,36 @@ def run_distance_vector(routers: dict[str, Router], t_max: int) -> dict[int, Ord
         del tables[t - 1]
     return tables
 
+def write_to_file(tables: dict[int, OrderedDict[str, OrderedDict[str, tuple[str, int]]]]) -> None:
+    # Transform the original structure into a different format
+    transformed_data: dict[dict] = dict()
+    for t, routers in tables.items():
+        router_data = {
+            "routers": {}
+        }
+        for router_id, routes in routers.items():
+            router_table: list[dict] = []
+            for destination, (next_hop, cost) in routes.items():
+                router_table.append({
+                    "destination": destination,
+                    "next_hop": next_hop,
+                    "cost": cost
+                })
+            router_data["routers"][router_id] = {
+                "table": router_table
+            }
+        transformed_data[t] = router_data
+    # Dump the transformed data to the output.json file
+    with open('output.json', 'w') as file:
+        json.dump(transformed_data, file, indent=3)
+
 if __name__ == '__main__':
     # Read the current network configuration
     routers: dict[str, Router] = read_network_file("test_network.txt")
     # Run the algorithm and save all the steps
     tables: dict[int, OrderedDict[str, OrderedDict[str, tuple[str, int]]]] = run_distance_vector(routers=routers, t_max=len(routers))
     # Save the file locally
-    with open('output.json', 'w') as file:
-        json.dump(tables, file, indent=3)
+    write_to_file(tables)
     # Try opening a curses UI
     try:
         # Initialize the UI
