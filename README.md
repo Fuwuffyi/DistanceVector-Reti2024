@@ -38,7 +38,7 @@ The project consists of multiple files:
 The network file is written in two sections:
 1. The first section contains all routers and their `ids`, the `id` is a case sensitive string (e.g.: `r A`).
 2. The second section contains `links` between said routers, the `link` contains two router ids and the cost between them (e.g.: `l A B 4`).
-Example:
+#### Example:
 ```txt
 r A
 r B
