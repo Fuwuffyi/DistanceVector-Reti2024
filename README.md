@@ -31,13 +31,13 @@ The project consists of multiple files:
    python main.py test_network.txt
    ```
 4. The application will show the curses terminal UI, use the `h` key to show a help message.
-5. You can scroll through the tables using the `mouse wheel` or the `up/down` arrows
-6. You can change page (the current time) using the `left/right` arrows
-7. Use q to quit
+5. You can scroll through the tables using the `mouse wheel` or the `up/down` arrows.
+6. You can change page (the current time) using the `left/right` arrows.
+7. Use q to quit.
 ### Network file specifications
 The network file is written in two sections:
-1. The first section contains all routers and their `ids`, the `id` is a case sensitive string (e.g.: `r A`)
-2. The second section contains `links` between said routers, the `link` contains two router ids and the cost between them (e.g.: `l A B 4`)
+1. The first section contains all routers and their `ids`, the `id` is a case sensitive string (e.g.: `r A`).
+2. The second section contains `links` between said routers, the `link` contains two router ids and the cost between them (e.g.: `l A B 4`).
 Example:
 ```txt
 r A
@@ -47,4 +47,4 @@ l A B 3
 l B C 2
 l A C 7
 ```
-It will create a three node network, with costs 3 (between A and B), 2 (between B and C), 7 (between A and C)
+It will create a three node network, with costs: **3** (between A and B), **2** (between B and C) and **7** (between A and C)
