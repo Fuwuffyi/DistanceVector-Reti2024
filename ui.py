@@ -27,7 +27,7 @@ def handle_user_input(stdscr: curses.window, cursor_position: tuple[int, int], t
     rows, cols = stdscr.getmaxyx()
     key: int = stdscr.getch()
     # Exit if q pressed
-    if key == ord('q'):
+    if key == ord('q') or key == 27:
         return (-1, -1)
     elif key == ord('d') or key == curses.KEY_RIGHT:
         # Next page
