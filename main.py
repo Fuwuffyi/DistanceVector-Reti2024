@@ -98,5 +98,5 @@ if __name__ == '__main__':
                 ui.draw(stdscr, cursor_position, total_pages, tables)
         curses.endwin()
     except:
-        print("You do not have the curses module (curses_windows for windows)")
+        print("You do not have the curses module (curses_windows for windows)\nOutput saved to 'output.json'")
 
