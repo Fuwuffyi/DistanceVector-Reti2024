@@ -1,8 +1,6 @@
 #!/bin/python
 
-import ui
 import json
-import curses
 from router import Router
 from collections import OrderedDict
 from networkmanager import read_network_file
@@ -80,6 +78,9 @@ if __name__ == '__main__':
     write_to_file(tables)
     # Try opening a curses UI
     try:
+        # Import UI here to check if user has the correct modules
+        import ui
+        import curses
         # Initialize the UI
         stdscr: curses.window = ui.init()
         # Create the window to make sure it is the right dimensions
