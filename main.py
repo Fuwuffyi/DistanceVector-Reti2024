@@ -1,5 +1,6 @@
 #!/bin/python
 
+import sys
 import json
 from router import Router
 from collections import OrderedDict
@@ -70,8 +71,13 @@ def write_to_file(tables: dict[int, OrderedDict[str, OrderedDict[str, tuple[str,
         json.dump(transformed_data, file, indent=3)
 
 if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("You need to specify the network configuration file!")
+        print("Example usage: `python main.py test_network.txt`")
+        exit(1)
+    network_file: str = sys.argv[1]
     # Read the current network configuration
-    routers: dict[str, Router] = read_network_file("test_network.txt")
+    routers: dict[str, Router] = read_network_file(network_file)
     # Run the algorithm and save all the steps
     tables: dict[int, OrderedDict[str, OrderedDict[str, tuple[str, int]]]] = run_distance_vector(routers=routers, t_max=len(routers))
     # Save the file locally
